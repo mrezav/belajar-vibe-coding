@@ -1,0 +1,12 @@
+Buatkan saya sebuah github issue yang hanya berisi hello world. gunakan github CLI di komputer saya untuk membuat github issuenya
+
+
+Tolong buatkan file issue.md berisi planning untuk membuat ini:
+
+Buat project baru di folder ini menggunakan bun, serta gunakan dependency berikut:
+- elysiaJS
+- drizzle ORM
+- MySQL
+
+jangan terlalu detail atau low level cukup instruksi secara high level
+nanti dokumen planningnya akan di implementasikan oleh junior programmer atau model yang lebih murah
