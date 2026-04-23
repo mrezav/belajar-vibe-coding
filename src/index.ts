@@ -1,20 +1,12 @@
 import { Elysia } from "elysia";
-import { db } from "./db";
-import { users } from "./db/schema";
+import { userRoute } from "./routes/user-route";
 
 const app = new Elysia()
   .get("/", () => ({
     message: "Welcome to Elysia + Bun + Drizzle + MySQL API!",
     status: "online",
   }))
-  .get("/users", async () => {
-    try {
-      const allUsers = await db.select().from(users);
-      return allUsers;
-    } catch (error) {
-      return { error: "Database connection failed or table does not exist." };
-    }
-  })
+  .use(userRoute)
   .listen(3000);
 
 console.log(
