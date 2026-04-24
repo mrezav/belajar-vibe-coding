@@ -3,7 +3,7 @@ import { users, sessions } from "../db/schema";
 import { eq } from "drizzle-orm";
 import bcrypt from "bcrypt";
 
-export const registerUser = async ({ email, password }: any) => {
+export const registerUser = async ({ name, email, password }: any) => {
   // 1. Check if email exists
   const existingUser = await db
     .select()
@@ -20,14 +20,16 @@ export const registerUser = async ({ email, password }: any) => {
 
   // 3. Insert user
   await db.insert(users).values({
+    name,
     email,
     password: hashedPassword,
   });
 
   // 4. Get the created user (without password)
-  const newUser = await db
+  const [user] = await db
     .select({
       id: users.id,
+      name: users.name,
       email: users.email,
       createdAt: users.createdAt,
       updatedAt: users.updatedAt,
@@ -36,7 +38,11 @@ export const registerUser = async ({ email, password }: any) => {
     .where(eq(users.email, email))
     .limit(1);
 
-  return newUser[0];
+  if (!user) {
+    throw new Error("Gagal mengambil data user");
+  }
+
+  return user;
 };
 
 export const loginUser = async ({ email, password }: any) => {
@@ -67,4 +73,24 @@ export const loginUser = async ({ email, password }: any) => {
   });
 
   return token;
+};
+
+export const getUserByToken = async (token: string) => {
+  const [user] = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      createdAt: users.createdAt,
+    })
+    .from(sessions)
+    .innerJoin(users, eq(sessions.userId, users.id))
+    .where(eq(sessions.token, token))
+    .limit(1);
+
+  if (!user) {
+    throw new Error("unauthorized");
+  }
+
+  return user;
 };
