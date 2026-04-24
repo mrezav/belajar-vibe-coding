@@ -1,5 +1,5 @@
 import { Elysia, t } from "elysia";
-import { registerUser, loginUser, getUserByToken } from "../services/user-service";
+import { registerUser, loginUser, getUserByToken, logoutUser } from "../services/user-service";
 
 export const userRoute = new Elysia({ prefix: "/api/users" })
   .post("/", async ({ body, set }) => {
@@ -48,28 +48,50 @@ export const userRoute = new Elysia({ prefix: "/api/users" })
       password: t.String(),
     })
   })
-  .get("/current", async ({ headers, set }) => {
-    try {
-      const auth = headers["authorization"];
-      if (!auth || !auth.startsWith("Bearer ")) {
-        throw new Error("unauthorized");
-      }
+  .group("", (app) => 
+    app
+      .derive(({ headers, set }) => {
+        const auth = headers["authorization"];
+        if (!auth || !auth.startsWith("Bearer ")) {
+          set.status = 401;
+          throw new Error("unauthorized");
+        }
 
-      const token = auth.slice(7);
-      const user = await getUserByToken(token);
+        return {
+          token: auth.slice(7)
+        };
+      })
+      .get("/current", async ({ token, set }) => {
+        try {
+          const user = await getUserByToken(token);
 
-      return {
-        data: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          created_at: user.createdAt,
-        },
-      };
-    } catch (error: any) {
-      set.status = 401;
-      return {
-        error: "unauthorized",
-      };
-    }
-  });
+          return {
+            data: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              created_at: user.createdAt,
+            },
+          };
+        } catch (error: any) {
+          set.status = 401;
+          return {
+            error: "unauthorized",
+          };
+        }
+      })
+      .delete("/logout", async ({ token, set }) => {
+        try {
+          await logoutUser(token);
+
+          return {
+            data: "ok",
+          };
+        } catch (error: any) {
+          set.status = 401;
+          return {
+            error: "unauthorized",
+          };
+        }
+      })
+  );
