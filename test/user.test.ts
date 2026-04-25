@@ -72,7 +72,7 @@ const createAndLoginUser = async () => {
     email: "test@example.com",
     password: "password123",
   });
-  const loginJson = await loginRes.json();
+  const loginJson = (await loginRes.json()) as any;
   return loginJson.data as string;
 };
 
@@ -86,7 +86,7 @@ describe("POST /api/users - Register User", () => {
       email: "john@example.com",
       password: "password123",
     });
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(json.message).toBe("User berhasil dibuat");
@@ -140,7 +140,7 @@ describe("POST /api/users - Register User", () => {
       email: "john@example.com",
       password: "password456",
     });
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(409);
     expect(json.error).toBe("Email sudah terdaftar");
@@ -163,7 +163,7 @@ describe("POST /api/users/login - Login User", () => {
       email: "john@example.com",
       password: "password123",
     });
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(typeof json.data).toBe("string");
@@ -180,7 +180,7 @@ describe("POST /api/users/login - Login User", () => {
       email: "wrong@example.com",
       password: "password123",
     });
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("email atau password salah");
@@ -197,7 +197,7 @@ describe("POST /api/users/login - Login User", () => {
       email: "john@example.com",
       password: "wrongpassword",
     });
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("email atau password salah");
@@ -220,7 +220,7 @@ describe("GET /api/users/current - Get Current User", () => {
     const token = await createAndLoginUser();
 
     const res = await getCurrentUser(`Bearer ${token}`);
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(typeof json.data).toBe("object");
@@ -232,7 +232,7 @@ describe("GET /api/users/current - Get Current User", () => {
 
   test("gagal jika tanpa header Authorization", async () => {
     const res = await getCurrentUser();
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("unauthorized");
@@ -242,7 +242,7 @@ describe("GET /api/users/current - Get Current User", () => {
     const token = await createAndLoginUser();
 
     const res = await getCurrentUser(token); // tanpa "Bearer "
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("unauthorized");
@@ -250,7 +250,7 @@ describe("GET /api/users/current - Get Current User", () => {
 
   test("gagal jika token tidak valid / palsu", async () => {
     const res = await getCurrentUser("Bearer fake-token-12345");
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("unauthorized");
@@ -265,7 +265,7 @@ describe("DELETE /api/users/logout - Logout User", () => {
     const token = await createAndLoginUser();
 
     const res = await logoutUser(`Bearer ${token}`);
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(200);
     expect(json.data).toBe("ok");
@@ -277,7 +277,7 @@ describe("DELETE /api/users/logout - Logout User", () => {
 
   test("gagal logout jika tanpa header Authorization", async () => {
     const res = await logoutUser();
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("unauthorized");
@@ -285,7 +285,7 @@ describe("DELETE /api/users/logout - Logout User", () => {
 
   test("gagal logout jika token tidak valid / palsu", async () => {
     const res = await logoutUser("Bearer fake-token-12345");
-    const json = await res.json();
+    const json = (await res.json()) as any;
 
     expect(res.status).toBe(401);
     expect(json.error).toBe("unauthorized");

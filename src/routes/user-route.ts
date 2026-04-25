@@ -70,7 +70,7 @@ export const userRoute = new Elysia({ prefix: "/api/users" })
         };
       })
       .onError(({ error, set }) => {
-        if (error.message === "unauthorized") {
+        if (error instanceof Error && error.message === "unauthorized") {
           set.status = 401;
           return { error: "unauthorized" };
         }
