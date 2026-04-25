@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { userRoute } from "./routes/user-route";
 
-const app = new Elysia()
+export const app = new Elysia()
   .get("/", () => ({
     message: "Welcome to Elysia + Bun + Drizzle + MySQL API!",
     status: "online",
