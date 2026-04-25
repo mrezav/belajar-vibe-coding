@@ -1,7 +1,13 @@
-import { describe, test, expect, beforeEach } from "bun:test";
-import { db } from "../src/db";
+import { describe, test, expect, beforeEach, afterAll } from "bun:test";
+import { db, connection } from "../src/db";
 import { users, sessions } from "../src/db/schema";
 import { app } from "../src/index";
+
+const BASE_URL = "http://localhost/api/users";
+
+afterAll(async () => {
+  await connection.end();
+});
 
 // Helper: bersihkan data sebelum setiap test
 beforeEach(async () => {
@@ -11,7 +17,7 @@ beforeEach(async () => {
 
 // Helper: register user dan return response
 const registerUser = async (body: Record<string, unknown>) => {
-  const req = new Request("http://localhost:3000/api/users", {
+  const req = new Request(BASE_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -21,7 +27,7 @@ const registerUser = async (body: Record<string, unknown>) => {
 
 // Helper: login user dan return response
 const loginUser = async (body: Record<string, unknown>) => {
-  const req = new Request("http://localhost:3000/api/users/login", {
+  const req = new Request(`${BASE_URL}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -35,7 +41,7 @@ const getCurrentUser = async (token?: string) => {
   if (token) {
     headers["Authorization"] = token;
   }
-  const req = new Request("http://localhost:3000/api/users/current", {
+  const req = new Request(`${BASE_URL}/current`, {
     method: "GET",
     headers,
   });
@@ -48,7 +54,7 @@ const logoutUser = async (token?: string) => {
   if (token) {
     headers["Authorization"] = token;
   }
-  const req = new Request("http://localhost:3000/api/users/logout", {
+  const req = new Request(`${BASE_URL}/logout`, {
     method: "DELETE",
     headers,
   });
@@ -84,10 +90,10 @@ describe("POST /api/users - Register User", () => {
 
     expect(res.status).toBe(200);
     expect(json.message).toBe("User berhasil dibuat");
-    expect(json.data).toBeDefined();
+    expect(typeof json.data).toBe("object");
     expect(json.data.email).toBe("john@example.com");
     expect(json.data.name).toBe("John Doe");
-    expect(json.data.id).toBeDefined();
+    expect(typeof json.data.id).toBe("number");
   });
 
   test("gagal jika email format tidak valid", async () => {
@@ -160,7 +166,6 @@ describe("POST /api/users/login - Login User", () => {
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.data).toBeDefined();
     expect(typeof json.data).toBe("string");
   });
 
@@ -218,25 +223,29 @@ describe("GET /api/users/current - Get Current User", () => {
     const json = await res.json();
 
     expect(res.status).toBe(200);
-    expect(json.data).toBeDefined();
+    expect(typeof json.data).toBe("object");
     expect(json.data.email).toBe("test@example.com");
     expect(json.data.name).toBe("Test User");
-    expect(json.data.id).toBeDefined();
-    expect(json.data.created_at).toBeDefined();
+    expect(typeof json.data.id).toBe("number");
+    expect(typeof json.data.created_at).toBe("string");
   });
 
   test("gagal jika tanpa header Authorization", async () => {
     const res = await getCurrentUser();
+    const json = await res.json();
 
     expect(res.status).toBe(401);
+    expect(json.error).toBe("unauthorized");
   });
 
   test("gagal jika format token salah (tanpa Bearer prefix)", async () => {
     const token = await createAndLoginUser();
 
     const res = await getCurrentUser(token); // tanpa "Bearer "
+    const json = await res.json();
 
     expect(res.status).toBe(401);
+    expect(json.error).toBe("unauthorized");
   });
 
   test("gagal jika token tidak valid / palsu", async () => {
@@ -268,8 +277,10 @@ describe("DELETE /api/users/logout - Logout User", () => {
 
   test("gagal logout jika tanpa header Authorization", async () => {
     const res = await logoutUser();
+    const json = await res.json();
 
     expect(res.status).toBe(401);
+    expect(json.error).toBe("unauthorized");
   });
 
   test("gagal logout jika token tidak valid / palsu", async () => {

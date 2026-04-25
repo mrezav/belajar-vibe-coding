@@ -20,32 +20,24 @@ berikan juga panduan lengkap mengenai langkah atau cara menggunakan docker compo
 tambahkan panduan cara mengakses mysql tersebut menggunakan mysql client lewat terminal di komputer saya
 
 
-Buatkan issue.md untuk planning berikut:
+Buatkan issue.md untuk planning yang akan dikerjakan junior atau model murah sebagai berikut:
 
-Buat table sessions dengan kolom berikut:
-- id INT autoincrement primary key
-- token varchar(100) not null  => berisi uuid untuk token user login
-- user_id integer => FK tabel users
-- created_at timestamp default current_timestamp
+Buatkan API Logout
 
-Buatkan juga migration file untuk table users tersebut
+Berikut ini adalah spesifikasinya :
 
-kemudian buat API untuk login user:
-endpoint : api/users 
-request body :
-{
-    "email":"admin@mail.com",
-    "password":"secret"
-}
+endpoint : DELETE api/users/logout 
+headers : 
+-- Authorization: Bearer token => token didapat setelah berhasil login
 
 response body success:
 {
-    "data": "token"    
+    "data": "ok",
 }
 
 response body error:
 {
-    "error": "email atau password salah"
+    "error": "unauthorized"
 }
 
 struktur folder di dalam src :
@@ -56,5 +48,16 @@ struktur file:
  -- routes: menggunakan format seperti berikut user-route.ts
  -- services: menggunakan format seperti berikut user-service.ts
 
- jelaskan tahapan untuk mengimplementasikan fitur ini. 
+ jelaskan tahapan-tahapan untuk mengimplementasikan fitur ini. 
  anggap nanti yang melakukan implementasikan adalah model AI yang lebih murah atau junior programmer
+
+
+ Buatkan issue.md berisi planning/perencanaan sebagai berikut:
+
+ buatkan unit test untuk semua API yang tersedia
+
+ simpan di folder test menggunakan bun test
+ setiap skenario hapus datanya lebih dulu agar konsisten
+ buat skenario test per API selengkap mungkin.
+
+jangan buatkan terlalu detail instruksi unit testnya. buatkan saja skenario apa yang harus di test. biarkan nanti implementasi detail skenarionya adalah junior atau model murah.

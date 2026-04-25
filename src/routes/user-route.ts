@@ -62,13 +62,18 @@ export const userRoute = new Elysia({ prefix: "/api/users" })
       .derive(({ headers, set }) => {
         const auth = headers["authorization"];
         if (!auth || !auth.startsWith("Bearer ")) {
-          set.status = 401;
           throw new Error("unauthorized");
         }
 
         return {
           token: auth.slice(7)
         };
+      })
+      .onError(({ error, set }) => {
+        if (error.message === "unauthorized") {
+          set.status = 401;
+          return { error: "unauthorized" };
+        }
       })
       .get("/current", async ({ token, set }) => {
         try {
